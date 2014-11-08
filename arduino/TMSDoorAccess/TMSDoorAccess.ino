@@ -10,7 +10,7 @@
 // The status LED is connected to pin 13
 int statusLED = 13;
 // The output relay is connected to pin 7
-int relay = 13;
+int relay = 7;
 // The software serial for verification is connected to pins 2 (RX) & 3 (TX).
 int verifyRX = 2;
 int verifyTX = 3;
