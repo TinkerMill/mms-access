@@ -1,0 +1,1 @@
+This folder contains test scripts for the TinkerMill Member Management System (MMS).
