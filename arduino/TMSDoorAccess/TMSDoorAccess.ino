@@ -29,7 +29,7 @@
   * The possible responses will be as follows ( NOTE: These are decoupled from the requests, therefore they can be sent at any time.  This will allow situations such as keeping the door unlocked for an extended period such as during an open house.):
   *   byte[ 0] - ID of the access module ( arduino)
   *   byte[ 1] - Response type:
-  *     0x01 - Unlock door ( short duration, i.e. badge in)
+  *     0x01 - Unlock door access ( short duration, i.e. badge in)
   *     0x02 - Unlock door persistent ( undefined duration, i.e. unlock door for an open house)
   *     0x03 - Lock door ( re-lock the door, i.e. after an open house)
   *   byte[ 2] - Checksum byte[ 0]
@@ -230,7 +230,7 @@ void loop() {
       // Perform the actions of the response
       switch( inputGateway[ 2]) {
         case 0x01: {
-          // Unlock door for Access (short term)
+          // Unlock door access (short term)
           unlockDoorAccess();
           break;
         }
