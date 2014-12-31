@@ -30,7 +30,7 @@ def main():
     # Open the serial port
     ser = serial.Serial( serialPort, 9600, timeout = 0)
     # Send the command
-    ser.write( unlockDoorAccess())
+    ser.write( str( unlockDoorAccess()))
     #
     print "Sent unlockDoorAccess command."
 
