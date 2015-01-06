@@ -33,18 +33,19 @@ def check_packet():
     global bufferArray
     while( len( bufferArray) > 15):
         print( "Buffer Length: %d" % ( len( bufferArray), ))
+        print( "       contents: %s" % ( ''.join( bufferArray), ))
         # search for the 0x02 char, which is the start of the card
-        try:
-            startIndex = bufferArray.index( '\x02')
-            endIndex = bufferArray.index( '\x03')
-            #print( "       Start Index: %d" % ( startIndex, ))
-            #print( "       End Index: %d" % ( endIndex, ))
-            #print( "       length: %d" % ( endIndex - startIndex, ))
-            print( "       value: %s" % ( ''.join( bufferArray[ startIndex + 1: startIndex + 11]), ))
-            # Remove the card read from the buffer
-            bufferArray = bufferArray[ endIndex + 1: ]
-        except:
-            pass
+        #try:
+        #    startIndex = bufferArray.index( '\x02')
+        #    endIndex = bufferArray.index( '\x03')
+        #    #print( "       Start Index: %d" % ( startIndex, ))
+        #    #print( "       End Index: %d" % ( endIndex, ))
+        #    #print( "       length: %d" % ( endIndex - startIndex, ))
+        #    print( "       value: %s" % ( ''.join( bufferArray[ startIndex + 1: startIndex + 11]), ))
+        #    # Remove the card read from the buffer
+        #    bufferArray = bufferArray[ endIndex + 1: ]
+        #except:
+        #    pass
 
 def read_from_port( ser):
     global connected
