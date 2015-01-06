@@ -50,15 +50,15 @@ int redRFIDStatusLED = 5;
 // The output relay is connected to pin 7
 int relay = 7;
 // The software serial for verification is connected to pins 2 (RX) & 3 (TX).
-int verifyRX = 2;
-int verifyTX = 3;
+int verifyRX = 10;
+int verifyTX = 11;
 SoftwareSerial mySerial( verifyRX, verifyTX);
 // Input buffer from RFID reader ( currently 16 bytes)
 int currentCharRFID = 0;
 char inputRFID[ 16];
 // Input buffer from gateway ( currently 4 bytes)
 int currentCharGateway = 0;
-char inputGateway[ 4];
+char inputGateway[ 6];
 // ID of the access module ( arduino)
 // THIS MUST BE UNIQUE ON THE RS-485 BUS ( which hasn't been deployed yet, so leave as 0x01)
 char myID = 0x01;
@@ -68,6 +68,8 @@ char myID = 0x01;
 void setup() {                
   // Setup the output pins
   pinMode( statusLED, OUTPUT);
+  pinMode( greenRFIDStatusLED, OUTPUT);
+  pinMode( redRFIDStatusLED, OUTPUT);
   pinMode( relay, OUTPUT);
   // Setup the serial ports
   Serial.begin( 9600);
@@ -76,16 +78,21 @@ void setup() {
   Serial.println( "Goodnight moon!");
   Serial.println( "TinkerMill Member Management System (MMS)");
   Serial.println( "Door Access - Arduino Firmware v0.0.1");
+  // Trying to clear the buffers
+  inputRFIDClearBuffer();
+  inputGatewayClearBuffer();
 }
 
 /* ### HELPER FUNCTIONS ### */
 boolean checkInputRFIDBuffer() {
   // Run through a series of checks to see if the buffer is valid.  These are from the RFID reader datasheet.
-  if( inputRFID[ 0] == 0x02) {
-    if( inputRFID[ 13] == 0x0D) {
-      if( inputRFID[ 14] == 0x0A) {
-        if( inputRFID[ 15] == 0x03) {
-          return( true);
+  if( currentCharRFID == 16) {
+    if( inputRFID[ 0] == 0x02) {
+      if( inputRFID[ 13] == 0x0D) {
+        if( inputRFID[ 14] == 0x0A) {
+          if( inputRFID[ 15] == 0x03) {
+            return( true);
+          }
         }
       }
     }
@@ -95,11 +102,13 @@ boolean checkInputRFIDBuffer() {
 
 boolean checkInputGatewayBuffer() {
   // Run through a series of checks to see if the buffer is valid.
-  if( inputGateway[ 0] == myID) {
-    if( inputGateway[ 4] == 0x0D) {
-      if( inputGateway[ 5] == 0x0A) {
-        // Should do a checksum verification here
-        return( true);
+  if( currentCharGateway == 6) {
+    if( inputGateway[ 0] == myID) {
+      if( inputGateway[ 4] == 0x0D) {
+        if( inputGateway[ 5] == 0x0A) {
+          // Should do a checksum verification here
+          return( true);
+        }
       }
     }
   }
@@ -139,25 +148,30 @@ void sendRFIDswipeRequest() {
   mySerial.write( inputRFID[ 12]);
   mySerial.write( 0x0D);
   mySerial.write( 0x0A);
+  return;
 }
 
 void unlockDoorAccess() {
   // Engage the unlock relay and Green Status LED for 7 seconds.
   unlockDoor();
   delay( 7000); // 7 seconds should be enough to get the door open.
+  // This is a terrible way to do this.  This should probably be handled by the gateway, or a timer with an interrupt.
   lockDoor();
+  return;
 }
 
 void unlockDoor() {
   // Engage the unlock relay and Green Status LED indefinitely.
   digitalWrite( greenRFIDStatusLED, HIGH);
   digitalWrite( relay, HIGH);
+  return;
 }
 
 void lockDoor() {
   // Disengage the unlock relay and Green Status LED indefinitely.
   digitalWrite( greenRFIDStatusLED, LOW);
   digitalWrite( relay, LOW);
+  return;
 }
 
 void displayBadRequest() {
@@ -173,18 +187,20 @@ void displayBadRequest() {
   digitalWrite( redRFIDStatusLED, HIGH);
   delay( 1000 / 6);
   digitalWrite( redRFIDStatusLED, LOW);
+  return;
 }
 
 void inputRFIDClearBuffer() {
   // Set all of the chars in the buffer to 0x00
-  for( currentCharRFID = 15; currentCharRFID <= 0; currentCharRFID--) {
+  for( currentCharRFID = 15; currentCharRFID > 0; currentCharRFID--) {
     inputRFID[ currentCharRFID] = 0x00;
   }
+  return;
 }
 
 void inputGatewayClearBuffer() {
   // Set all of the chars in the buffer to 0x00
-  for( currentCharGateway = 4; currentCharGateway <= 0; currentCharGateway--) {
+  for( currentCharGateway = 5; currentCharGateway > 0; currentCharGateway--) {
     inputGateway[ currentCharGateway] = 0x00;
   }
 }
@@ -197,18 +213,31 @@ void loop() {
   // Currently, for testing and to get the system operational quickly, I'm going to code this using a simple polling methodology.
   // Check for an incoming character from the RFID reader.
   if( Serial.available()) {
-    // Save the byte to the RFID input buffer.
-    inputRFID[ currentCharRFID] = Serial.read();
-    currentCharRFID++;
+    // If the buffer's not full
+    if( currentCharGateway < 16) {
+      // Save the byte to the RFID input buffer.
+      inputRFID[ currentCharRFID] = Serial.read();
+      currentCharRFID++;
+    } else {
+      inputRFIDClearBuffer();
+    }
   }
+  
   // Check for an incoming character form the gateway.
   if( mySerial.available()) {
-    // Save the byte to the RFID input buffer.
-    inputGateway[ currentCharGateway] = mySerial.read();
-    currentCharGateway++;
+    // If the buffer's not full
+    if( currentCharGateway < 6) {
+      // Save the byte
+      inputGateway[ currentCharGateway] = mySerial.read();
+      currentCharGateway++;
+    } else {
+      // otherwise clear the buffer
+      inputGatewayClearBuffer();
+    }
   }
+  
   // Check to see if the RFID input buffer is full or the last char was a newline.
-  if( currentCharRFID > 15 || inputRFID[ currentCharRFID] == 0x0A) {
+  if( inputRFID[ currentCharRFID - 1] == 0x0A) {
     // Turn on the yellow status LED to show that a request is being processed
     digitalWrite( statusLED, HIGH);
     // Check the buffer to make sure it's valid
@@ -221,14 +250,15 @@ void loop() {
     // Turn off the yellow status LED to show that a request has been processed
     digitalWrite( statusLED, LOW);
   }
-  // Check to see if the gateway input buffer is full or the last char was a newline.
-  if( currentCharGateway > 4 || inputGateway[ currentCharGateway] == 0x0A) {
+  
+  // If the last written character is 0x0A
+  if( inputGateway[ currentCharGateway - 1] == 0x0A) {
     // Turn on the yellow status LED to show that a request is being processed
     digitalWrite( statusLED, HIGH);
     // Check the buffer to make sure it's valid
     if( checkInputGatewayBuffer()) {
       // Perform the actions of the response
-      switch( inputGateway[ 2]) {
+      switch( inputGateway[ 1]) {
         case 0x01: {
           // Unlock door access (short term)
           unlockDoorAccess();
@@ -246,6 +276,7 @@ void loop() {
         }
         default: {
           // Bad command, do nothing.
+          displayBadRequest();
           break;
         }
       }
