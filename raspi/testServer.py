@@ -13,9 +13,6 @@ import yaml
 #import wx
 
 ### GLOBALS ###
-serialPort = "/dev/tty.usbserial-A5027KD1" # /dev/tty* for *nix, COM? for Windows
-baudRate = 9600
-
 connected = False
 exitFlag = False
 
@@ -62,8 +59,13 @@ def read_from_port( ser):
 ### MAIN ###
 def main():
     global exitFlag
-    # Stuff.
-    ser = serial.Serial( serialPort, baudRate, timeout = 0)
+    
+    # Load the config
+    config = yaml.load( file( 'config.yaml', 'r'))
+    # Check for values (serialPort, baudRate, cards)
+    
+    # Run the fun
+    ser = serial.Serial( config.serialPort, config.baudRate, timeout = 0)
     thread = threading.Thread( target = read_from_port, args = ( ser, ))
     thread.start()
     
