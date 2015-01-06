@@ -65,7 +65,7 @@ def main():
     # Check for values (serialPort, baudRate, cards)
     
     # Run the fun
-    ser = serial.Serial( config.serialPort, config.baudRate, timeout = 0)
+    ser = serial.Serial( config[ 'serialPort'], config[ 'baudRate'], timeout = 0)
     thread = threading.Thread( target = read_from_port, args = ( ser, ))
     thread.start()
     
