@@ -1,0 +1,9 @@
+---
+# Configure the system settings
+serialPort: "/dev/tty.usbserial-A5027KD1"
+baudRate: 9600
+
+# Configure the list of card that can access the door system
+cards:
+  - "6A0049F63E" # Test A
+  - "870051527E" # Member Card 0005329534
