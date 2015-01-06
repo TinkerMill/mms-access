@@ -31,7 +31,7 @@ def handle_data( data):
 def check_packet():
     # Check the global array for a packet
     global bufferArray
-    while( len( bufferArray) > 15):
+    while( len( bufferArray) > 1):
         print( "Buffer Length: %d" % ( len( bufferArray), ))
         print( "       contents: %s" % ( ''.join( bufferArray), ))
         # search for the 0x02 char, which is the start of the card
