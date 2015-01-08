@@ -43,7 +43,7 @@ def check_packet():
             print( "       length: %d" % ( endIndex - startIndex, ))
             print( "       value: %s" % ( ''.join( bufferArray[ startIndex + 2: startIndex + 12]), ))
         #    # Remove the card read from the buffer
-        #    bufferArray = bufferArray[ endIndex + 1: ]
+            bufferArray = []
         except:
             pass
 
