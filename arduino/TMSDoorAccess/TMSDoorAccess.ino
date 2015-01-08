@@ -230,7 +230,6 @@ void loop() {
       digitalWrite( statusLED, HIGH);
       // Save the byte to the RFID input buffer.
       inputRFID[ currentCharRFID] = serRFID.read();
-      Serial.write( inputRFID[ currentCharRFID]);
       currentCharRFID++;
       digitalWrite( statusLED, LOW);
     } else {
@@ -242,9 +241,11 @@ void loop() {
   while( serGateway.available() > 0) {
     // If the buffer's not full
     if( currentCharGateway < 6) {
+      digitalWrite( statusLED, HIGH);
       // Save the byte
       inputGateway[ currentCharGateway] = serGateway.read();
       currentCharGateway++;
+      digitalWrite( statusLED, LOW);
     } else {
       // otherwise clear the buffer
       inputGatewayClearBuffer();
