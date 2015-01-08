@@ -16,6 +16,7 @@ import yaml
 connected = False
 exitFlag = False
 
+config = {}
 bufferArray = []
 
 ### CLASSES ###
@@ -42,7 +43,12 @@ def check_packet():
         #    #print( "       End Index: %d" % ( endIndex, ))
         #    #print( "       length: %d" % ( endIndex - startIndex, ))
         #    #print( "       value: %s" % ( ''.join( bufferArray[ startIndex + 2: startIndex + 12]), ))
-            check_card( ''.join( bufferArray[ startIndex + 2: startIndex + 12]))
+            if( check_card( ''.join( bufferArray[ startIndex + 2: startIndex + 12]))):
+                # The card is allowed, so send the good command
+                print( "Card status: ALLOWED")
+            else:
+                # The card is unknown, so send the bad command
+                print( "Card status: DENIED")
             # Remove the card read from the buffer
             bufferArray = []
         except:
@@ -66,6 +72,7 @@ def read_from_port( ser):
 
 ### MAIN ###
 def main():
+    global config
     global exitFlag
     
     # Load the config
