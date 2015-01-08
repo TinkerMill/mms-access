@@ -22,14 +22,14 @@ bufferArray = []
 ### CLASSES ###
 
 ### FUNCTIONS ###
-def handle_data( data):
+def handle_data( ser, data):
     # Add the byte to an array and check for a complete packet
     global bufferArray
     if( len( data) > 0):
         bufferArray.append( data)
-        check_packet()
+        check_packet( ser)
 
-def check_packet():
+def check_packet( ser):
     # Check the global array for a packet
     global bufferArray
     while( len( bufferArray) > 15):
@@ -49,10 +49,11 @@ def check_packet():
             else:
                 # The card is unknown, so send the bad command
                 print( "Card status: DENIED")
-            # Remove the card read from the buffer
-            bufferArray = []
         except:
-            pass
+            # Something went wrong, so send the bad command
+            print( "Card status: ERROR")
+        # Remove the card read from the buffer
+        bufferArray = []
 
 def check_card( value):
     # check the card value against the list of proper cards
@@ -63,6 +64,30 @@ def check_card( value):
         return True
     return False
 
+def send_access( ser):
+    # Generate a hardcoded command for the prototype
+    command = bytearray(6)
+    command[ 0] = chr( 0x01) # ID of Access Module (Arduino)
+    command[ 1] = chr( 0x00) # Bad command
+    command[ 2] = chr( 0x55) # Checksum (currently unused)
+    command[ 3] = chr( 0xAA) # Checksum (currently unused)
+    command[ 4] = chr( 0x0D) # Carriage Return
+    command[ 5] = chr( 0x0A) # Line Feed
+    # Send the command
+    ser.write( command)
+
+def send_denied( ser):
+    # Generate a hardcoded command for the prototype
+    command = bytearray(6)
+    command[ 0] = chr( 0x01) # ID of Access Module (Arduino)
+    command[ 1] = chr( 0x00) # Bad command
+    command[ 2] = chr( 0x55) # Checksum (currently unused)
+    command[ 3] = chr( 0xAA) # Checksum (currently unused)
+    command[ 4] = chr( 0x0D) # Carriage Return
+    command[ 5] = chr( 0x0A) # Line Feed
+    # Send the command
+    ser.write( command)
+
 def read_from_port( ser):
     global connected
     global exitFlag
@@ -71,7 +96,8 @@ def read_from_port( ser):
         
         while not exitFlag:
             reading = ser.read() # read a byte
-            handle_data( reading)
+            # Pass the serial port along so we can send packets out of it.
+            handle_data( ser, reading)
 
 ### MAIN ###
 def main():
