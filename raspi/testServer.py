@@ -44,8 +44,8 @@ def check_packet():
             print( "       value: %s" % ( ''.join( bufferArray[ startIndex + 2: startIndex + 12]), ))
         #    # Remove the card read from the buffer
         #    bufferArray = bufferArray[ endIndex + 1: ]
-        #except:
-        #    pass
+        except:
+            pass
 
 def check_card( value):
     # check the card value against the list of proper cards
