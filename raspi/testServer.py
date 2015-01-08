@@ -59,7 +59,7 @@ def check_card( value):
     global config
     print( "Checking card: %s" % ( value, ))
     # if in list, return true
-    if( value in config.cards):
+    if( value in config[ 'cards']):
         return True
     return False
 
