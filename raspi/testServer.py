@@ -37,12 +37,13 @@ def check_packet():
         # Assuming the first char is the first char of the read packet
         try:
             startIndex = 0;
-            endIndex = bufferArray.index( '\x0A')
+        #    endIndex = bufferArray.index( '\x0A')
         #    #print( "       Start Index: %d" % ( startIndex, ))
         #    #print( "       End Index: %d" % ( endIndex, ))
-            print( "       length: %d" % ( endIndex - startIndex, ))
-            print( "       value: %s" % ( ''.join( bufferArray[ startIndex + 2: startIndex + 12]), ))
-        #    # Remove the card read from the buffer
+        #    #print( "       length: %d" % ( endIndex - startIndex, ))
+        #    #print( "       value: %s" % ( ''.join( bufferArray[ startIndex + 2: startIndex + 12]), ))
+            check_card( ''.join( bufferArray[ startIndex + 2: startIndex + 12]))
+            # Remove the card read from the buffer
             bufferArray = []
         except:
             pass
