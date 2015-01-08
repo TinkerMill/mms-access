@@ -49,10 +49,14 @@ int greenRFIDStatusLED = 4;
 int redRFIDStatusLED = 5;
 // The output relay is connected to pin 7
 int relay = 7;
-// The software serial for verification is connected to pins 2 (RX) & 3 (TX).
-int verifyRX = 10;
-int verifyTX = 11;
-SoftwareSerial mySerial( verifyRX, verifyTX);
+// The software serial for reading the RFID module to pins 8 (TX) & 9 (RX).
+int rfidRX = 8;
+int rfidTX = 9;
+SoftwareSerial serRFID( rfidRX, rfidTX);
+// The software serial for verification is connected to pins 10 (TX) & 11 (RX).
+int gatewayRX = 10;
+int gatewayTX = 11;
+SoftwareSerial serGateway( gatewayRX, gatewayTX);
 // Input buffer from RFID reader ( currently 16 bytes)
 int currentCharRFID = 0;
 char inputRFID[ 16];
@@ -71,9 +75,15 @@ void setup() {
   pinMode( greenRFIDStatusLED, OUTPUT);
   pinMode( redRFIDStatusLED, OUTPUT);
   pinMode( relay, OUTPUT);
+  // Setup the serial pins
+  pinMode( rfidRX, INPUT);
+  pinMode( rfidTX, OUTPUT);
+  pinMode( gatewayRX, INPUT);
+  pinMode( gatewayTX, OUTPUT);
   // Setup the serial ports
   Serial.begin( 9600);
-  mySerial.begin( 9600);
+  serRFID.begin( 9600);
+  serGateway.begin( 9600);
   // A bit of the ol' debug info
   Serial.println( "Goodnight moon!");
   Serial.println( "TinkerMill Member Management System (MMS)");
@@ -81,6 +91,8 @@ void setup() {
   // Trying to clear the buffers
   inputRFIDClearBuffer();
   inputGatewayClearBuffer();
+  // Make sure we're listening on the correct serial port
+  serRFID.listen();
 }
 
 /* ### HELPER FUNCTIONS ### */
@@ -133,21 +145,21 @@ void sendRFIDswipeRequest() {
   //   byte[ 13] - Checksum byte[ 1] ( from the reader) ( inputRFID[ 12])
   //   byte[ 14] - \r ( 0x0D)
   //   byte[ 15] - \n ( 0x0A)
-  mySerial.write( myID);
-  mySerial.write( inputRFID[ 1]);
-  mySerial.write( inputRFID[ 2]);
-  mySerial.write( inputRFID[ 3]);
-  mySerial.write( inputRFID[ 4]);
-  mySerial.write( inputRFID[ 5]);
-  mySerial.write( inputRFID[ 6]);
-  mySerial.write( inputRFID[ 7]);
-  mySerial.write( inputRFID[ 8]);
-  mySerial.write( inputRFID[ 9]);
-  mySerial.write( inputRFID[ 10]);
-  mySerial.write( inputRFID[ 11]);
-  mySerial.write( inputRFID[ 12]);
-  mySerial.write( 0x0D);
-  mySerial.write( 0x0A);
+  serGateway.write( myID);
+  serGateway.write( inputRFID[ 1]);
+  serGateway.write( inputRFID[ 2]);
+  serGateway.write( inputRFID[ 3]);
+  serGateway.write( inputRFID[ 4]);
+  serGateway.write( inputRFID[ 5]);
+  serGateway.write( inputRFID[ 6]);
+  serGateway.write( inputRFID[ 7]);
+  serGateway.write( inputRFID[ 8]);
+  serGateway.write( inputRFID[ 9]);
+  serGateway.write( inputRFID[ 10]);
+  serGateway.write( inputRFID[ 11]);
+  serGateway.write( inputRFID[ 12]);
+  serGateway.write( 0x0D);
+  serGateway.write( 0x0A);
   return;
 }
 
@@ -212,23 +224,26 @@ void inputGatewayClearBuffer() {
 void loop() {
   // Currently, for testing and to get the system operational quickly, I'm going to code this using a simple polling methodology.
   // Check for an incoming character from the RFID reader.
-  if( Serial.available()) {
+  while( serRFID.available() > 0) {
     // If the buffer's not full
-    if( currentCharGateway < 16) {
+    if( currentCharRFID < 16) {
+      digitalWrite( statusLED, HIGH);
       // Save the byte to the RFID input buffer.
-      inputRFID[ currentCharRFID] = Serial.read();
+      inputRFID[ currentCharRFID] = serRFID.read();
+      Serial.write( inputRFID[ currentCharRFID]);
       currentCharRFID++;
+      digitalWrite( statusLED, LOW);
     } else {
       inputRFIDClearBuffer();
     }
   }
   
   // Check for an incoming character form the gateway.
-  if( mySerial.available()) {
+  while( serGateway.available() > 0) {
     // If the buffer's not full
     if( currentCharGateway < 6) {
       // Save the byte
-      inputGateway[ currentCharGateway] = mySerial.read();
+      inputGateway[ currentCharGateway] = serGateway.read();
       currentCharGateway++;
     } else {
       // otherwise clear the buffer
@@ -237,13 +252,15 @@ void loop() {
   }
   
   // Check to see if the RFID input buffer is full or the last char was a newline.
-  if( inputRFID[ currentCharRFID - 1] == 0x0A) {
+  if( inputRFID[ currentCharRFID - 1] == 0x03) {
     // Turn on the yellow status LED to show that a request is being processed
     digitalWrite( statusLED, HIGH);
+      delay( 100);
     // Check the buffer to make sure it's valid
     if( checkInputRFIDBuffer()) {
       // Send the request for an RFID swipe
       sendRFIDswipeRequest();
+      serGateway.listen();
     }
     // Clear the buffer
     inputRFIDClearBuffer();
@@ -280,6 +297,7 @@ void loop() {
           break;
         }
       }
+      serRFID.listen();
     }
     // Clear the buffer
     inputGatewayClearBuffer();
