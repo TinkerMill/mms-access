@@ -31,21 +31,27 @@ def handle_data( data):
 def check_packet():
     # Check the global array for a packet
     global bufferArray
-    while( len( bufferArray) > 1):
+    while( len( bufferArray) > 15):
         print( "Buffer Length: %d" % ( len( bufferArray), ))
-        print( "       contents: %s" % ( ''.join( bufferArray), ))
-        # search for the 0x02 char, which is the start of the card
-        #try:
-        #    startIndex = bufferArray.index( '\x02')
-        #    endIndex = bufferArray.index( '\x03')
+        #print( "       contents: %s" % ( ''.join( bufferArray), ))
+        # Assuming the first char is the first char of the read packet
+        try:
+            startIndex = 
+            endIndex = bufferArray.index( '\x0A')
         #    #print( "       Start Index: %d" % ( startIndex, ))
         #    #print( "       End Index: %d" % ( endIndex, ))
-        #    #print( "       length: %d" % ( endIndex - startIndex, ))
-        #    print( "       value: %s" % ( ''.join( bufferArray[ startIndex + 1: startIndex + 11]), ))
+            print( "       length: %d" % ( endIndex - startIndex, ))
+            print( "       value: %s" % ( ''.join( bufferArray[ startIndex + 2: startIndex + 12]), ))
         #    # Remove the card read from the buffer
         #    bufferArray = bufferArray[ endIndex + 1: ]
         #except:
         #    pass
+
+def check_card( value):
+    # check the card value against the list of proper cards
+    print( "Checking card: %s" % ( value, ))
+    # if in list, return true
+    return False
 
 def read_from_port( ser):
     global connected
