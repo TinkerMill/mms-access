@@ -56,8 +56,11 @@ def check_packet():
 
 def check_card( value):
     # check the card value against the list of proper cards
+    global config
     print( "Checking card: %s" % ( value, ))
     # if in list, return true
+    if( value in config.cards):
+        return True
     return False
 
 def read_from_port( ser):
