@@ -46,12 +46,15 @@ def check_packet( ser):
             if( check_card( ''.join( bufferArray[ startIndex + 2: startIndex + 12]))):
                 # The card is allowed, so send the good command
                 print( "Card status: ALLOWED")
+                send_access( ser)
             else:
                 # The card is unknown, so send the bad command
                 print( "Card status: DENIED")
+                send_denied( ser)
         except:
             # Something went wrong, so send the bad command
             print( "Card status: ERROR")
+            send_denied( ser)
         # Remove the card read from the buffer
         bufferArray = []
 
