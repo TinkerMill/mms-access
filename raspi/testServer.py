@@ -71,7 +71,7 @@ def send_access( ser):
     # Generate a hardcoded command for the prototype
     command = bytearray(6)
     command[ 0] = chr( 0x01) # ID of Access Module (Arduino)
-    command[ 1] = chr( 0x00) # Bad command
+    command[ 1] = chr( 0x01) # Bad command
     command[ 2] = chr( 0x55) # Checksum (currently unused)
     command[ 3] = chr( 0xAA) # Checksum (currently unused)
     command[ 4] = chr( 0x0D) # Carriage Return
