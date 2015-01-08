@@ -36,7 +36,7 @@ def check_packet():
         #print( "       contents: %s" % ( ''.join( bufferArray), ))
         # Assuming the first char is the first char of the read packet
         try:
-            startIndex = 
+            startIndex = 0;
             endIndex = bufferArray.index( '\x0A')
         #    #print( "       Start Index: %d" % ( startIndex, ))
         #    #print( "       End Index: %d" % ( endIndex, ))
