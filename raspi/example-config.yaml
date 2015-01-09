@@ -1,6 +1,6 @@
 ---
 # Configure the system settings
-serialPort: "/dev/tty.usbserial-A5027KD1"
+serialPort: "/dev/ttyAMA0"
 baudRate: 9600
 
 # Configure the list of card that can access the door system
