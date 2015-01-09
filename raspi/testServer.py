@@ -108,7 +108,7 @@ def main():
     global exitFlag
     
     # Load the config
-    config = yaml.load( file( 'config.yaml', 'r'))
+    config = yaml.load( file( '/etc/mms/config.yaml', 'r'))
     # Check for values (serialPort, baudRate, cards)
     
     # Run the fun
